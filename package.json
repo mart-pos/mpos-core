@@ -1,0 +1,59 @@
+{
+  "name": "mpos-core",
+  "version": "1.1.1",
+  "description": "MPOS Core – Servicio local que permite conectar Mart POS con impresoras USB para imprimir tickets y facturas.",
+  "main": "main.js",
+  "author": "martpos.app",
+  "license": "ISC",
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps",
+    "rebuild": "electron-rebuild",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build": "electron-builder -mwl"
+  },
+  "build": {
+    "appId": "com.mpos.core",
+    "productName": "MPOS Core",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "**/*",
+      "!dist",
+      "!node_modules/.cache"
+    ],
+    "asar": false,
+    "asarUnpack": [
+      "**/node_modules/usb/**",
+      "**/node_modules/@point-of-sale/**"
+    ],
+    "mac": {
+      "icon": "public/mpos-core-logo.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "public/mpos-core-logo.png",
+      "target": "nsis",
+      "requestedExecutionLevel": "requireAdministrator"
+    }
+  },
+  "devDependencies": {
+    "electron": "^39.2.3",
+    "electron-builder": "^26.0.12",
+    "electron-rebuild": "^3.2.9"
+  },
+  "dependencies": {
+    "@point-of-sale/receipt-printer-encoder": "^3.0.3",
+    "@printers/printers": "^0.8.3",
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "usb": "^2.16.0"
+  }
+}

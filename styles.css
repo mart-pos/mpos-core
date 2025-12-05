@@ -1,0 +1,267 @@
+/* ======================================================
+   MART POS — PALETA OKLCH PARA MP CORE
+   ====================================================== */
+
+:root {
+    /* Radius */
+    --radius: 0.4rem;
+
+    /* PRIMARY (negro Mart POS) */
+    --primary: oklch(0.145 0 0);
+    --primary-hover: oklch(0.2 0 0);
+    --primary-active: oklch(0.1 0 0);
+    --primary-foreground: oklch(1 0 0); /* blanco */
+
+    /* BACKGROUND */
+    --bg: oklch(1 0 0);
+    --bg-card: oklch(1 0 0);
+    --bg-muted: oklch(0.97 0 0);
+
+    /* TEXT */
+    --text: oklch(0.145 0 0);
+    --text-muted: oklch(0.556 0 0);
+
+    /* BORDER */
+    --border: oklch(0.92 0 0);
+    --border-hover: oklch(0.88 0 0);
+
+    /* BADGES */
+    --badge-blue-bg: oklch(0.95 0.01 240);
+    --badge-blue-text: oklch(0.4 0.02 240);
+    --badge-green-bg: oklch(0.93 0.05 150);
+    --badge-green-text: oklch(0.38 0.1 150);
+
+    --transition: 150ms ease;
+}
+
+.dark {
+    --primary: oklch(1 0 0);
+    --primary-hover: oklch(0.97 0 0);
+    --primary-active: oklch(0.92 0 0);
+    --primary-foreground: oklch(0.15 0 0);
+
+    --bg: hsl(0, 0%, 7%);
+    --bg-card: hsl(0, 0%, 9.8%);
+    --bg-muted: hsl(0, 0%, 14%);
+
+    --text: hsl(0, 0%, 92%);
+    --text-muted: hsl(0, 0%, 70%);
+
+    --border: hsla(0, 0%, 40%, 0.2);
+    --border-hover: hsla(0, 0%, 55%, 0.25);
+
+    --badge-blue-bg: oklch(0.3 0.05 240);
+    --badge-blue-text: oklch(0.85 0.01 240);
+    --badge-green-bg: oklch(0.32 0.06 150);
+    --badge-green-text: oklch(0.88 0.01 150);
+}
+
+/* ======================================================
+   BASE
+   ====================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    padding: 32px;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.titlebar {
+    -webkit-app-region: drag;
+    height: 32px;
+    width: 100%;
+    background: #ffffff;
+}
+
+button,
+input,
+a {
+    -webkit-app-region: no-drag;
+}
+
+/* Logo invert */
+.logo-dark {
+    filter: invert(1) brightness(0.2);
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-right: 12px;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+}
+
+/* Header */
+.app-header {
+    margin-bottom: 24px;
+}
+
+.app-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Container */
+.container {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+/* ======================================================
+   CARD — sin sombras
+   ====================================================== */
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    /* SHADOW REMOVED */
+    box-shadow: none;
+
+    margin-bottom: 24px;
+}
+
+.card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* ======================================================
+   BUTTONS
+   ====================================================== */
+
+button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+button:hover {
+    background: var(--bg-muted);
+    border-color: var(--border-hover);
+}
+
+button.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+button.primary:hover {
+    background: var(--primary-hover);
+}
+
+button.primary:active {
+    background: var(--primary-active);
+}
+
+button.outline {
+    background: transparent;
+}
+
+button.small {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* Status text */
+.status-text {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* ======================================================
+   PRINTER LIST
+   ====================================================== */
+
+.printer-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.printer-list li {
+    padding: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    transition: var(--transition);
+}
+
+.printer-list li:hover {
+    background: var(--bg-muted);
+    border-color: var(--border-hover);
+}
+
+.printer-info strong {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.printer-info small {
+    color: var(--text-muted);
+}
+
+/* BADGES */
+.badge {
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 600;
+
+    background: var(--badge-blue-bg);
+    color: var(--badge-blue-text);
+}
+
+.badge.success {
+    background: var(--badge-green-bg);
+    color: var(--badge-green-text);
+}

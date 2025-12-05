@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>MPOS-Core – Servicio Local</title>
+  </head>
+
+  <body class="titlebar">
+    <div class="titlebar"></div>
+
+    <main class="container">
+      <!-- HEADER -->
+      <header class="app-header">
+        <div class="header-top">
+          <div class="logos">
+            <img
+              src="mpos-core-logo.png"
+              alt="MPOS-Core Logo"
+              class="logo logo-dark"
+            />
+          </div>
+
+          <div>
+            <h1 id="txt_title">MPOS-Core</h1>
+            <p id="txt_subtitle" class="subtitle">
+              Servicio local que permite imprimir tickets y facturas desde Mart
+              POS utilizando impresoras USB.
+            </p>
+          </div>
+
+          <!-- SELECTOR DE IDIOMA -->
+          <div class="lang-switcher">
+            <select id="lang-select">
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- ACCESO DIRECTO -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2 id="txt_access_title">Acceso a Mart POS</h2>
+            <p id="txt_access_desc" class="subtitle">
+              Abre el panel de configuración para gestionar tus impresoras y
+              dispositivos.
+            </p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <button
+            id="txt_open_panel"
+            class="primary"
+            onclick="mpcore.openExternal('https://martpos.app/settings')"
+          >
+            Ir al panel de Mart POS
+          </button>
+        </div>
+      </section>
+
+      <!-- ESTADO DEL SERVICIO LOCAL -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2 id="txt_status_title">Estado del Servicio Local</h2>
+            <p id="txt_status_desc" class="subtitle">
+              Controla si MPOS-Core está activo para impresión local.
+            </p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <p id="agent-status" class="status-text">Verificando estado...</p>
+
+          <div class="actions" style="margin-top: 12px">
+            <button id="toggle-agent" class="primary">Cargando...</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- IMPRESORAS DETECTADAS -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2 id="txt_printers_title">Impresoras Detectadas</h2>
+            <p id="txt_printers_desc" class="subtitle">
+              Lista de impresoras USB conectadas al equipo.
+            </p>
+          </div>
+
+          <button id="refresh-printers" class="outline small">
+            <span id="txt_refresh">Refrescar</span>
+          </button>
+        </div>
+
+        <div class="card-body">
+          <ul id="printer-list" class="printer-list"></ul>
+        </div>
+      </section>
+
+      <!-- TEST PRINT -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2 id="txt_test_title">Prueba de Impresión</h2>
+            <p id="txt_test_desc" class="subtitle">
+              Envía un ticket de prueba para verificar la conexión.
+            </p>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <button id="test-print" class="primary">
+            <span id="txt_test_button">Imprimir ticket de prueba</span>
+          </button>
+          <p id="print-result" class="status-text"></p>
+        </div>
+      </section>
+    </main>
+
+    <!-- SCRIPT -->
+    <script>
+      const API_BASE = "http://localhost:3300";
+
+      /* ===========================================================
+       * SISTEMA DE IDIOMAS (ES ↔ EN) + MENSAJES SEMÁNTICOS
+       * =========================================================== */
+      const i18n = {
+        es: {
+          title: "MPOS-Core",
+          subtitle:
+            "Servicio local que permite imprimir tickets y facturas desde Mart POS utilizando impresoras USB.",
+
+          access_title: "Acceso a Mart POS",
+          access_desc:
+            "Abre el panel de configuración para gestionar impresoras y dispositivos.",
+          open_panel: "Ir al panel de Mart POS",
+
+          status_title: "Estado del Servicio Local",
+          status_desc:
+            "Controla si MPOS-Core está activo para impresión local.",
+
+          printers_title: "Impresoras Detectadas",
+          printers_desc: "Lista de impresoras USB conectadas al equipo.",
+          refresh: "Refrescar",
+
+          test_title: "Prueba de Impresión",
+          test_desc: "Envía un ticket de prueba para verificar la conexión.",
+          test_button: "Imprimir ticket de prueba",
+
+          core_active: "MPOS-Core está activo",
+          core_off: "MPOS-Core está apagado",
+          core_error: "No se pudo conectar con MPOS-Core",
+
+          start_service: "Iniciar servicio",
+          stop_service: "Detener servicio",
+          reconnect: "Intentar reconectar",
+
+          no_printers: "No se detectaron impresoras USB",
+          error_printers: "Error al cargar las impresoras",
+
+          printing: "Imprimiendo...",
+          print_ok: "Impresión realizada correctamente",
+          print_error: "No se pudo imprimir",
+
+          /* MENSAJES SEMÁNTICOS */
+          ERR_AGENT_OFF: "MPOS-Core está apagado.",
+          ERR_USB_OUT: "No se encontró un puerto USB para imprimir.",
+          ERR_THERMAL_NOT_FOUND: "No se detectó ninguna impresora térmica.",
+          ERR_PRINT_TEST: "Error al imprimir el ticket de prueba.",
+          ERR_UNKNOWN: "Error desconocido.",
+        },
+
+        en: {
+          title: "MPOS-Core",
+          subtitle:
+            "Local service that enables printing tickets and invoices from Mart POS using USB printers.",
+
+          access_title: "Access Mart POS",
+          access_desc:
+            "Open the settings panel to manage printers and devices.",
+          open_panel: "Open Mart POS Panel",
+
+          status_title: "Local Service Status",
+          status_desc:
+            "Control whether MPOS-Core is active for local printing.",
+
+          printers_title: "Detected Printers",
+          printers_desc: "List of USB printers connected to the device.",
+          refresh: "Refresh",
+
+          test_title: "Test Print",
+          test_desc: "Send a test ticket to verify the connection.",
+          test_button: "Print test ticket",
+
+          core_active: "MPOS-Core is running",
+          core_off: "MPOS-Core is stopped",
+          core_error: "Cannot connect to MPOS-Core",
+
+          start_service: "Start service",
+          stop_service: "Stop service",
+          reconnect: "Try reconnecting",
+
+          no_printers: "No USB printers detected",
+          error_printers: "Error loading printers",
+
+          printing: "Printing...",
+          print_ok: "Print completed successfully",
+          print_error: "Could not print",
+
+          /* SEMANTIC MESSAGES */
+          ERR_AGENT_OFF: "MPOS-Core is turned off.",
+          ERR_USB_OUT: "USB OUT endpoint not found.",
+          ERR_THERMAL_NOT_FOUND: "No thermal printer detected.",
+          ERR_PRINT_TEST: "Error printing test ticket.",
+          ERR_UNKNOWN: "Unknown error.",
+        },
+      };
+
+      const semanticMap = {
+        THERMAL_PRINTER_NOT_FOUND: "ERR_THERMAL_NOT_FOUND",
+        USB_OUT_ENDPOINT_NOT_FOUND: "ERR_USB_OUT",
+        AGENT_OFF: "ERR_AGENT_OFF",
+        PRINT_TEST_ERROR: "ERR_PRINT_TEST",
+        NO_PRINTERS_FOUND: "no_printers",
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      let currentLang = localStorage.getItem("mposcore_lang") || "es";
+
+      function t(key) {
+        return i18n[currentLang][key] || key;
+      }
+
+      function semanticMessage(code) {
+        const mapped = semanticMap[code];
+        return mapped ? t(mapped) : t("ERR_UNKNOWN");
+      }
+
+      function applyTranslations() {
+        document.getElementById("txt_title").textContent = t("title");
+        document.getElementById("txt_subtitle").textContent = t("subtitle");
+
+        document.getElementById("txt_access_title").textContent =
+          t("access_title");
+        document.getElementById("txt_access_desc").textContent =
+          t("access_desc");
+        document.getElementById("txt_open_panel").textContent = t("open_panel");
+
+        document.getElementById("txt_status_title").textContent =
+          t("status_title");
+        document.getElementById("txt_status_desc").textContent =
+          t("status_desc");
+
+        document.getElementById("txt_printers_title").textContent =
+          t("printers_title");
+        document.getElementById("txt_printers_desc").textContent =
+          t("printers_desc");
+        document.getElementById("txt_refresh").textContent = t("refresh");
+
+        document.getElementById("txt_test_title").textContent = t("test_title");
+        document.getElementById("txt_test_desc").textContent = t("test_desc");
+        document.getElementById("txt_test_button").textContent =
+          t("test_button");
+      }
+
+      langSelect.value = currentLang;
+      langSelect.onchange = () => {
+        currentLang = langSelect.value;
+        localStorage.setItem("mposcore_lang", currentLang);
+        applyTranslations();
+        loadStatus();
+        loadPrinters();
+      };
+
+      /* ===========================================================
+       * STATUS / PRINTERS / TEST PRINT
+       * =========================================================== */
+      async function loadStatus() {
+        try {
+          const res = await fetch(API_BASE + "/agent/status");
+          const data = await res.json();
+          const enabled = data.enabled === true;
+
+          document.getElementById("agent-status").textContent = enabled
+            ? t("core_active")
+            : t("core_off");
+
+          document.getElementById("toggle-agent").textContent = enabled
+            ? t("stop_service")
+            : t("start_service");
+
+          document.getElementById("toggle-agent").dataset.enabled = enabled;
+        } catch {
+          document.getElementById("agent-status").textContent = t("core_error");
+          document.getElementById("toggle-agent").textContent = t("reconnect");
+        }
+      }
+
+      document.getElementById("toggle-agent").onclick = async () => {
+        const enabled =
+          document.getElementById("toggle-agent").dataset.enabled === "true";
+
+        try {
+          await fetch(API_BASE + (enabled ? "/agent/off" : "/agent/on"), {
+            method: "POST",
+          });
+
+          await loadStatus();
+        } catch {
+          alert(t("core_error"));
+        }
+      };
+
+      async function loadPrinters() {
+        const list = document.getElementById("printer-list");
+        list.innerHTML = "";
+
+        try {
+          const res = await fetch(API_BASE + "/printers");
+          const data = await res.json();
+
+          if (!data.ok) {
+            if (data.code)
+              list.innerHTML = `<li>${semanticMessage(data.code)}</li>`;
+            else list.innerHTML = `<li>${t("error_printers")}</li>`;
+            return;
+          }
+
+          if (data.printers.length === 0) {
+            list.innerHTML = `<li>${t("no_printers")}</li>`;
+            return;
+          }
+
+          data.printers.forEach((d) => {
+            const li = document.createElement("li");
+
+            const badge = d.isThermalPrinter
+              ? '<span class="badge success">Térmica</span>'
+              : '<span class="badge">USB</span>';
+
+            li.innerHTML = `
+                            <div class="printer-info">
+                                <strong>${d.manufacturer || "?"} ${
+              d.product || "?"
+            }</strong>
+                                <small>Vendor ${d.vendorId} • Product ${
+              d.productId
+            }</small>
+                            </div>
+                            ${badge}
+                        `;
+            list.appendChild(li);
+          });
+        } catch {
+          list.innerHTML = `<li>${t("error_printers")}</li>`;
+        }
+      }
+
+      document.getElementById("refresh-printers").onclick = loadPrinters;
+
+      document.getElementById("test-print").onclick = async () => {
+        const out = document.getElementById("print-result");
+        out.textContent = t("printing");
+
+        try {
+          const res = await fetch(API_BASE + "/print-test");
+          const data = await res.json();
+
+          if (data.ok) {
+            out.textContent = t("print_ok");
+          } else {
+            const msg = data.code
+              ? semanticMessage(data.code)
+              : t("print_error");
+            out.textContent = msg;
+          }
+        } catch {
+          out.textContent = t("print_error");
+        }
+      };
+
+      applyTranslations();
+      loadStatus();
+      loadPrinters();
+    </script>
+  </body>
+</html>
